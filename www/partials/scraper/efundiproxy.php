@@ -4,9 +4,8 @@ include "simple_html_dom.php";
 
 $user=$_GET['a'];
 $pass=$_GET['b'];
-$urlefundilogin = "https://casprd.nwu.ac.za/cas/login?service=http%3A%2F%2Fefundi.nwu.ac.za%2Fsakai-login-tool%2Fcontainer";
+$urlefundilogin = "https://casprd.nwu.ac.za/cas/login?service=https%3A%2F%2Fefundi.nwu.ac.za%2Fsakai-login-tool%2Fcontainer";
 $cookie1='';
-
 
 $student=array();
 
@@ -23,7 +22,10 @@ $result3 = curl_exec($ch);
 $html= new simple_html_dom();
 $html->load($result3);
 $ltvalue=$html->find('input[name=lt]',0)->value;
-
+if (!$ltvalue) {
+  echo ('[{"login":"false"}]');
+  return;
+}
 
 //got the lt value now pass it with post request
 $heaer=[
@@ -56,8 +58,8 @@ $login=$html->find('head',0)->find('title',0)->plaintext;
 //if logged in crape
 if(!strpos($login, 'Authentication')){
 array_push($student,array('login'=>'true'));
-$anounurl=$html->find('a[title=Announcements - For posting current, time-critical information]',0)->href;
-$accounturl=$html->find('a[title=Account - View and modify my user profile]',0)->href;
+$anounurl=$html->find('a[title=Announcements - For posting and viewing current, time-critical information]',0)->href;
+$accounturl=$html->find('div[class=Mrphs-userNav__submenuitem--profile-and-image]',0)->find('a[role=menuitem]',0)->href;
 $starsubjects=$html->find('li[class=Mrphs-sitesNav__menuitem]');
 //for each subject in stared subjects get anouncement
 curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
@@ -67,6 +69,7 @@ curl_setopt($ch,CURLOPT_COOKIEJAR, $cookie1);
 $array=array();
 $subjectnames=array();
 foreach($starsubjects as $subject) {
+  try{
       array_push($subjectnames,array('subject'=>$subject->find('span',0)->plaintext));
       // push the cell's text to the array
 
@@ -76,7 +79,8 @@ foreach($starsubjects as $subject) {
       $result4 = curl_exec($ch);
       $html= new simple_html_dom();
       $html->load($result4);
-      $assignmenturl=$html->find('a[title=Assignments - For posting, submitting and grading assignment(s) online]',0)->href;
+      if($html->find('a[title=Assignments - For posting, submitting, and grading assignments online]',0)){
+      $assignmenturl=$html->find('a[title=Assignments - For posting, submitting, and grading assignments online]',0)->href; 
       curl_setopt($ch,CURLOPT_URL, $assignmenturl);
       $result5 = curl_exec($ch);
       $html= new simple_html_dom();
@@ -92,7 +96,10 @@ foreach($starsubjects as $subject) {
         );
         array_push($array,array("assignment"=>$array2));
       }
-
+    }
+    }
+    catch (customException $e) {
+    }
 
   }
 array_push($student,array('assignments'=>$array));
@@ -115,17 +122,21 @@ $html->load($result3);
 $fields2=$html->find('tr');
 $announcements=array();
 $announcement=array();
+if($fields2){
 foreach(array_slice($fields2,1) as $row){
-
+try{
    array_push($announcement,array("title"=>trim($row->find('th',0)->find('span',0)->plaintext),
   "author"=>trim($row->find('td[headers=author]',0)->plaintext),
   "date"=>trim($row->find('td[headers=date]',0)->plaintext),
   "InfoUrl"=>trim($row->find('a',0)->href),
   "module"=>trim($row->find('td[headers=channel]',0)->plaintext)));
-
+}catch (customException $e) {
+}
+}
 }
 array_push($student,array("announcements"=>$announcement));
 //account details
+try{
 curl_setopt($ch,CURLOPT_URL, $accounturl);
 curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch,CURLOPT_FOLLOWLOCATION, true);
@@ -134,20 +145,23 @@ curl_setopt ($ch, CURLOPT_COOKIEFILE, $cookie1);
 curl_setopt($ch,CURLOPT_COOKIEJAR, $cookie1);
 $result3 = curl_exec($ch);
 $html->load($result3);
-$fields2=$html->find('div[class=shorttext]');
-$userinfo=array();
-foreach($fields2 as $row){
-  array_push($userinfo,array(trim($row->plaintext)));
+
+  try{
+  array_push($student,array("user"=>trim($html->find('span[id=profileHeadingName]',0)->plaintext)));
+  }
+  catch (customException $e) {
+  }
 
 }
-
-array_push($student,array("user"=>$userinfo));
+catch (customException $e) {
+}
 echo json_encode($student);
 //start assignment scraper
 
 
   }else{
   echo '[{"login":"false"}]';
+  return;
   }
 
 

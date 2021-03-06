@@ -104,7 +104,7 @@ function populateDatabaseTimeTable(tablename,subjectlist){
 
   ];
 
-
+  localStorage.getItem(subjectlist);
    var subjectTable = JSON.parse(localStorage.getItem(subjectlist));
 
 
@@ -293,15 +293,15 @@ function drawTimeTableDash(){
   var div;
   var tablename;
   var subjectlist;
-  if(localStorage.getItem('radio1')=='1'){
-    tablename='timetabledefault';
-    subjectlist='defaultsubjects';
+  if(localStorage.getItem('radio1')=='3'){
+    tablename="timetablecustom2";
+     subjectlist='custom2';
 }else if(localStorage.getItem('radio1')=='2'){
    tablename="timetablecustom1";
    subjectlist='custom1';
 } else {
-     tablename="timetablecustom2";
-     subjectlist='custom2';
+     tablename='timetabledefault';
+    subjectlist='defaultsubjects';
 }
 populateDatabaseTimeTable(tablename,subjectlist);
   alasql('ATTACH LOCALSTORAGE DATABASE student');

@@ -32,6 +32,7 @@ function defaultsubjectlist(){
 
       localStorage.removeItem('defaultsubjects');
       localStorage.setItem('defaultsubjects', JSON.stringify(obj));
+      localStorage.getItem('defaultsubjects');
 
 var def = JSON.parse(localStorage.getItem('defaultsubjects'));
 

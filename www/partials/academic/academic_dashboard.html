@@ -567,7 +567,7 @@
 					document.getElementById("profilepic").src=JSON.parse(localStorage.getItem('profileimage'));
 				}
 				var userName=JSON.parse(localStorage.getItem('user'));
-				document.getElementById("username").innerHTML = String(userName[1]).split("Name")[1].trim();
+				document.getElementById("username").innerHTML = String(userName).split(" ")[0].trim();
 
 				app.request.json(
 					'assets/custom/dataset/timetable.json',

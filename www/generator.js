@@ -1,6 +1,4 @@
-const workbox =require("workbox-build");
-
-workbox.generateSW({
+module.exports = {
     cacheId:"pwa_hive",
     globDirectory:"./",
     globPatterns:[
@@ -18,4 +16,4 @@ workbox.generateSW({
       }
     }]
 
-  });
+  }
