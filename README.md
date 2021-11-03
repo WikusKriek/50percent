@@ -1,2 +1,2 @@
-# 50percet
+# 50percent
 Student app
